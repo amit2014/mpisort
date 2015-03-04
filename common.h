@@ -1,6 +1,7 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+#include <mpi.h>
 #include "sort.h"
 
 #ifdef DEBUG
@@ -40,6 +41,12 @@
 
 #define PRAGMA(x) _Pragma(#x)
 
+#define divceil(a, b) (((a)+(b)-1)/(b))
+#define safemin(a, b) (((a) < (b)) ? (a) : (b))
+#define mpi_seg_start(a, b, r, n) ((r)*(((b)-(a))/(n)) + safemin(r, ((b)-(a))%(n)))
+#define mpi_seg_end(a, b, r, n) safemin(b, mpi_seg_start(a, b, (r)+1, n))
+
+MPI_Datatype dataType_MPI();
 long long randull(unsigned int *seed);
 void psum(int *data, int n, int *data2);
 

@@ -1,5 +1,5 @@
-CC  = gcc-4.8
-CXX = g++-4.8
+CC  = mpicc
+CXX = mpic++
 
 CXXFLAGS = -Wall -fopenmp
 LIBFLAGS = -fPIC
@@ -19,23 +19,31 @@ TEST = check time
 
 $(LIBRARY): $(LIBOBJS)
 	$(CXX) $(CXXFLAGS) -shared -o $(LIBRARY) $(LIBOBJS)
+	for host in $$(tail -n +2 hostfile); do scp -o ConnectTimeout=4 $(LIBRARY) $$host:~/mpi/ ; done
 
 all: $(LIBRARY) $(TEST)
 debug: CXXFLAGS += -DDEBUG
 debug: all
+
 profiler: CXXFLAGS += -Dgprofiler
 profiler: LFLAGS += -L/usr/local/lib
 profiler: LIBS += -lprofiler
 profiler: debug
 
+send: $(LIBRARY) $(TEST)
+	for host in $$(tail -n +2 hostfile); do scp -o ConnectTimeout=4 $(LIBRARY) $(TEST) $$host:~/mpi/ ; done
+
 $(TEST): %: %.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LFLAGS) $(LIBS)
+	for host in $$(tail -n +2 hostfile); do scp -o ConnectTimeout=4 $@ $$host:~/mpi/ ; done
 
 $(LIBOBJS): %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(LIBFLAGS) -c $< -o $@
 
 clean:
 	$(RM) *.o *~ $(TEST) $(LIBRARY)
+kill:
+	for host in $$(tail -n +2 hostfile); do ssh $$host "kill -9 -1"; done
 
 depend: $(SRCS) $(LIBSRCS)
 	makedepend -Y. $^

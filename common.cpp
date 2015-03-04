@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <omp.h>
+#include <mpi.h>
 #include "common.h"
 
 int num_procs, for_ser_n;
@@ -32,3 +32,18 @@ void psum(int *data, int n, int *data2) {
     data[n-1] += data2[(n>>1)-1];
 }
 
+MPI_Datatype dataType_obj;
+bool dataTypeInit = false;
+
+MPI_Datatype dataType_MPI()    {
+    if(dataTypeInit)
+        return dataType_obj;
+    dataTypeInit = true;
+
+    int block_lens[] = {1, LOADSIZE, 1};
+    MPI_Aint disps[] = {0, sizeof(long long), sizeof(dataType)};
+    MPI_Datatype types[] = {MPI_LONG_LONG, MPI_CHAR, MPI_UB};
+    MPI_Type_create_struct(2, block_lens, disps, types, &dataType_obj);
+    MPI_Type_commit(&dataType_obj);
+    return dataType_obj;
+}
