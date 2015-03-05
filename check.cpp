@@ -37,7 +37,7 @@ int main(int argc, char **argv)  {
         }
 
         MPI_Barrier(MPI_COMM_WORLD);
-        pSort(data, n, MERGE);
+        pSort(data, n, QUICK);
 
         if(mpirank == 0)    {
             for(i = 0; i < n-1; ++i)

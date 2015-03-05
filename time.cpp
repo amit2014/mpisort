@@ -31,7 +31,7 @@ int main(int argc, char **argv)  {
     double start, end;
     MPI_Barrier(MPI_COMM_WORLD);
     start = MPI_Wtime();
-    pSort(data, n, MERGE);
+    pSort(data, n, QUICK);
     end = MPI_Wtime();
 
     if(mpirank == 0)    {
