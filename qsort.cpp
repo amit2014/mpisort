@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 #include <omp.h>
+#include <vector>
+using namespace std;
 
 #include "sort.h"
 #include "common.h"
@@ -80,6 +82,7 @@ void qSort_omp(dataType *data, int n)   {
 void qSort(dataType *data, int n_total)   {
     MPI_Status status;
     MPI_Request nodes_req, data_req;
+    vector<MPI_Request> nodes_reqs(0), data_reqs(0);
     int mpirank, mpisize;
     MPI_Comm_rank(MPI_COMM_WORLD, &mpirank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpisize);
@@ -113,10 +116,14 @@ void qSort(dataType *data, int n_total)   {
 
         // printf("rank: %d, nodes: %d, sending to %d\n", mpirank, nodes, mpirank+high_nodes);
         nodes -= high_nodes;
-        MPI_Send(&nodes, 1, MPI_INT, mpirank+high_nodes,
-                    mpirank+high_nodes+4096, MPI_COMM_WORLD);
-        MPI_Send(data+pivot, n-pivot, dataType_MPI(), mpirank+high_nodes,
-                mpirank+high_nodes, MPI_COMM_WORLD);
+
+        MPI_Request nodes_req, data_req;
+        nodes_reqs.push_back(nodes_req);
+        data_reqs.push_back(data_req);
+        MPI_Isend(&nodes, 1, MPI_INT, mpirank+high_nodes,
+                    mpirank+high_nodes+4096, MPI_COMM_WORLD, &(nodes_reqs.back()));
+        MPI_Isend(data+pivot, n-pivot, dataType_MPI(), mpirank+high_nodes,
+                mpirank+high_nodes, MPI_COMM_WORLD, &(data_reqs.back()));
 
         nodes = high_nodes;
         n = pivot;
@@ -137,4 +144,10 @@ void qSort(dataType *data, int n_total)   {
             n += recvd;
         }
     }
+
+    for(int i = 0; i < data_reqs.size(); ++i)
+        MPI_Wait(&(data_reqs[i]), &status);
+    for(int i = 0; i < nodes_reqs.size(); ++i)
+        MPI_Wait(&(nodes_reqs[i]), &status);
+
 }
