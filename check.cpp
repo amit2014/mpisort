@@ -12,7 +12,7 @@ int main(int argc, char **argv)  {
     MPI_Comm_rank(MPI_COMM_WORLD, &mpirank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpisize);
 
-    const int n = 1<<17;
+    const int n = 32;
     int i;
     bool failed = false;
     int a = mpi_seg_start(0, n, mpirank, mpisize),
@@ -50,7 +50,8 @@ int main(int argc, char **argv)  {
         }
 
         MPI_Barrier(MPI_COMM_WORLD);
-        pSort(data, n, BEST);
+        pSort(data, n, MERGE);
+        MPI_Barrier(MPI_COMM_WORLD);
 
         if(mpirank == 0)    {
             for(i = 0; i < n-1; ++i)
