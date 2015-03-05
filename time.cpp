@@ -11,7 +11,7 @@ int main(int argc, char **argv)  {
     MPI_Comm_rank(MPI_COMM_WORLD, &mpirank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpisize);
 
-    const int n = 1<<27;
+    const int n = (1<<27);
     int i;
     dataType *data = new dataType[n];
     
