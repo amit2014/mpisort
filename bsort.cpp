@@ -28,8 +28,11 @@ void bMerge(bool up, dataType *data, int n)   {
             data[i+m] = tmp;
         }
     }
+    #pragma omp task if(m > ser_n) untied
     bMerge(up, data, m);
+    #pragma omp task if(n-m > ser_n) untied
     bMerge(up, data+m, n-m);
+    #pragma omp taskwait
 }
 
 
