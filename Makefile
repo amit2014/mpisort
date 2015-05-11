@@ -1,7 +1,7 @@
 CC  = mpicc
 CXX = mpic++
 
-CXXFLAGS = -Wall -fopenmp
+CXXFLAGS = -O3 -Wall -fopenmp
 LIBFLAGS = -fPIC
 
 LFLAGS = -L.
